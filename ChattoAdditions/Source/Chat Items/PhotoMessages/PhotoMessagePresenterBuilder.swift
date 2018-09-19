@@ -30,6 +30,7 @@ open class PhotoMessagePresenterBuilder<ViewModelBuilderT, InteractionHandlerT>:
     ViewModelBuilderT.ViewModelT: PhotoMessageViewModelProtocol,
     InteractionHandlerT: BaseMessageInteractionHandlerProtocol,
     InteractionHandlerT.ViewModelT == ViewModelBuilderT.ViewModelT {
+    
     public typealias ModelT = ViewModelBuilderT.ModelT
     public typealias ViewModelT = ViewModelBuilderT.ViewModelT
 
@@ -42,7 +43,9 @@ open class PhotoMessagePresenterBuilder<ViewModelBuilderT, InteractionHandlerT>:
 
     public let viewModelBuilder: ViewModelBuilderT
     public let interactionHandler: InteractionHandlerT?
-    public let sizingCell: PhotoMessageCollectionViewCell = PhotoMessageCollectionViewCell.sizingCell()
+    
+    public let sizingCell: PhotoMessageCollectionViewCell<ViewModelT> = PhotoMessageCollectionViewCell<ViewModelT>.sizingCell()
+    
     public lazy var photoCellStyle: PhotoMessageCollectionViewCellStyleProtocol = PhotoMessageCollectionViewCellDefaultStyle()
     public lazy var baseCellStyle: BaseMessageCollectionViewCellStyleProtocol = BaseMessageCollectionViewCellDefaultStyle()
 

@@ -81,9 +81,21 @@ open class BaseMessageCollectionViewCellDefaultStyle: BaseMessageCollectionViewC
     public struct AvatarStyle {
         let size: CGSize
         let alignment: VerticalAlignment
+        
         public init(size: CGSize = .zero, alignment: VerticalAlignment = .bottom) {
             self.size = size
             self.alignment = alignment
+        }
+    }
+    
+    public struct SenderNameStyle {
+        let font: UIFont
+        let textColor: UIColor
+        let isHidden: Bool = false
+        
+        public init(font: UIFont = .systemFont(ofSize: 13), textColor: UIColor) {
+            self.font = font
+            self.textColor = textColor
         }
     }
 
@@ -106,6 +118,7 @@ open class BaseMessageCollectionViewCellDefaultStyle: BaseMessageCollectionViewC
     let layoutConstants: BaseMessageCollectionViewCellLayoutConstants
     let dateTextStyle: DateTextStyle
     let avatarStyle: AvatarStyle
+    let senderNameStyle: SenderNameStyle
     let selectionIndicatorStyle: SelectionIndicatorStyle
 
     public init(
@@ -115,6 +128,7 @@ open class BaseMessageCollectionViewCellDefaultStyle: BaseMessageCollectionViewC
         layoutConstants: BaseMessageCollectionViewCellLayoutConstants = Class.createDefaultLayoutConstants(),
         dateTextStyle: DateTextStyle = Class.createDefaultDateTextStyle(),
         avatarStyle: AvatarStyle = AvatarStyle(),
+        senderNameStyle: SenderNameStyle = SenderNameStyle(textColor: .red),
         selectionIndicatorStyle: SelectionIndicatorStyle = Class.createDefaultSelectionIndicatorStyle()) {
             self.colors = colors
             self.bubbleBorderImages = bubbleBorderImages
@@ -122,6 +136,7 @@ open class BaseMessageCollectionViewCellDefaultStyle: BaseMessageCollectionViewC
             self.layoutConstants = layoutConstants
             self.dateTextStyle = dateTextStyle
             self.avatarStyle = avatarStyle
+            self.senderNameStyle = senderNameStyle
             self.selectionIndicatorStyle = selectionIndicatorStyle
 
             self.dateStringAttributes = [

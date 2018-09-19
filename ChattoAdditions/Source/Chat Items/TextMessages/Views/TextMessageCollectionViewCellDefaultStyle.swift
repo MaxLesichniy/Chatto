@@ -25,7 +25,10 @@
 import UIKit
 import Chatto
 
-open class TextMessageCollectionViewCellDefaultStyle: TextMessageCollectionViewCellStyleProtocol {
+public typealias TextMessageCollectionViewCellDefaultStyle = TextBubbleViewDefaultStyle
+
+open class TextBubbleViewDefaultStyle: BaseBubbleDefaultStyle, TextBubbleViewStyleProtocol {
+    
     typealias Class = TextMessageCollectionViewCellDefaultStyle
 
     public struct BubbleImages {
@@ -49,42 +52,44 @@ open class TextMessageCollectionViewCellDefaultStyle: TextMessageCollectionViewC
         let font: () -> UIFont
         let incomingColor: () -> UIColor
         let outgoingColor: () -> UIColor
-        let incomingInsets: UIEdgeInsets
-        let outgoingInsets: UIEdgeInsets
+//        let incomingInsets: UIEdgeInsets
+//        let outgoingInsets: UIEdgeInsets
         public init(
             font: @autoclosure @escaping () -> UIFont,
             incomingColor: @autoclosure @escaping () -> UIColor,
-            outgoingColor: @autoclosure @escaping () -> UIColor,
-            incomingInsets: UIEdgeInsets,
-            outgoingInsets: UIEdgeInsets) {
+            outgoingColor: @autoclosure @escaping () -> UIColor
+//            incomingInsets: UIEdgeInsets,
+//            outgoingInsets: UIEdgeInsets
+            ) {
                 self.font = font
                 self.incomingColor = incomingColor
                 self.outgoingColor = outgoingColor
-                self.incomingInsets = incomingInsets
-                self.outgoingInsets = outgoingInsets
+//                self.incomingInsets = incomingInsets
+//                self.outgoingInsets = outgoingInsets
         }
     }
 
-    public let bubbleImages: BubbleImages
+//    public let bubbleImages: BubbleImages
     public let textStyle: TextStyle
-    public let baseStyle: BaseMessageCollectionViewCellDefaultStyle
-    public init (
-        bubbleImages: BubbleImages = Class.createDefaultBubbleImages(),
-        textStyle: TextStyle = Class.createDefaultTextStyle(),
-        baseStyle: BaseMessageCollectionViewCellDefaultStyle = BaseMessageCollectionViewCellDefaultStyle()) {
-            self.bubbleImages = bubbleImages
+    
+    public init(
+        bubbleMasks: BubbleMasks = BaseBubbleDefaultStyle.createDefaultBubbleMasks(),
+        baseStyle: BaseMessageCollectionViewCellDefaultStyle = BaseMessageCollectionViewCellDefaultStyle(),
+        incomingInsets: UIEdgeInsets = UIEdgeInsets(top: 10, left: 19, bottom: 10, right: 15),
+        outgoingInsets: UIEdgeInsets = UIEdgeInsets(top: 10, left: 15, bottom: 10, right: 19),
+        textStyle: TextStyle = Class.createDefaultTextStyle()) {
             self.textStyle = textStyle
-            self.baseStyle = baseStyle
+            super.init(bubbleMasks: bubbleMasks, baseStyle: baseStyle, incomingInsets: incomingInsets, outgoingInsets: outgoingInsets)
     }
 
-    lazy private var images: [ImageKey: UIImage] = {
-        return [
-            .template(isIncoming: true, showsTail: true): self.bubbleImages.incomingTail(),
-            .template(isIncoming: true, showsTail: false): self.bubbleImages.incomingNoTail(),
-            .template(isIncoming: false, showsTail: true): self.bubbleImages.outgoingTail(),
-            .template(isIncoming: false, showsTail: false): self.bubbleImages.outgoingNoTail()
-        ]
-    }()
+//    lazy private var images: [ImageKey: UIImage] = {
+//        return [
+//            .template(isIncoming: true, showsTail: true): self.bubbleImages.incomingTail(),
+//            .template(isIncoming: true, showsTail: false): self.bubbleImages.incomingNoTail(),
+//            .template(isIncoming: false, showsTail: true): self.bubbleImages.outgoingTail(),
+//            .template(isIncoming: false, showsTail: false): self.bubbleImages.outgoingNoTail()
+//        ]
+//    }()
 
     lazy var font: UIFont = self.textStyle.font()
     lazy var incomingColor: UIColor = self.textStyle.incomingColor()
@@ -98,73 +103,73 @@ open class TextMessageCollectionViewCellDefaultStyle: TextMessageCollectionViewC
         return viewModel.isIncoming ? self.incomingColor : self.outgoingColor
     }
 
-    open func textInsets(viewModel: TextMessageViewModelProtocol, isSelected: Bool) -> UIEdgeInsets {
-        return viewModel.isIncoming ? self.textStyle.incomingInsets : self.textStyle.outgoingInsets
-    }
+//    open func textInsets(viewModel: TextMessageViewModelProtocol, isSelected: Bool) -> UIEdgeInsets {
+//        return viewModel.isIncoming ? self.textStyle.incomingInsets : self.textStyle.outgoingInsets
+//    }
 
-    open func bubbleImageBorder(viewModel: TextMessageViewModelProtocol, isSelected: Bool) -> UIImage? {
-        return self.baseStyle.borderImage(viewModel: viewModel)
-    }
+//    open func bubbleImageBorder(viewModel: TextMessageViewModelProtocol, isSelected: Bool) -> UIImage? {
+//        return self.baseStyle.borderImage(viewModel: viewModel)
+//    }
+//
+//    open func bubbleImage(viewModel: TextMessageViewModelProtocol, isSelected: Bool) -> UIImage {
+//        let key = ImageKey.normal(isIncoming: viewModel.isIncoming, status: viewModel.status, showsTail: viewModel.decorationAttributes.isShowingTail, isSelected: isSelected)
+//
+//        if let image = self.images[key] {
+//            return image
+//        } else {
+//            let templateKey = ImageKey.template(isIncoming: viewModel.isIncoming, showsTail: viewModel.decorationAttributes.isShowingTail)
+//            if let image = self.images[templateKey] {
+//                let image = self.createImage(templateImage: image, isIncoming: viewModel.isIncoming, status: viewModel.status, isSelected: isSelected)
+//                self.images[key] = image
+//                return image
+//            }
+//        }
+//
+//        assert(false, "coulnd't find image for this status. ImageKey: \(key)")
+//        return UIImage()
+//    }
 
-    open func bubbleImage(viewModel: TextMessageViewModelProtocol, isSelected: Bool) -> UIImage {
-        let key = ImageKey.normal(isIncoming: viewModel.isIncoming, status: viewModel.status, showsTail: viewModel.decorationAttributes.isShowingTail, isSelected: isSelected)
+//    open func createImage(templateImage image: UIImage, isIncoming: Bool, status: MessageViewModelStatus, isSelected: Bool) -> UIImage {
+//        var color = isIncoming ? self.baseStyle.baseColorIncoming : self.baseStyle.baseColorOutgoing
+//
+//        switch status {
+//        case .success:
+//            break
+//        case .failed, .sending:
+//            color = color.bma_blendWithColor(UIColor.white.withAlphaComponent(0.70))
+//        }
+//
+//        if isSelected {
+//            color = color.bma_blendWithColor(UIColor.black.withAlphaComponent(0.10))
+//        }
+//
+//        return image.bma_tintWithColor(color)
+//    }
 
-        if let image = self.images[key] {
-            return image
-        } else {
-            let templateKey = ImageKey.template(isIncoming: viewModel.isIncoming, showsTail: viewModel.decorationAttributes.isShowingTail)
-            if let image = self.images[templateKey] {
-                let image = self.createImage(templateImage: image, isIncoming: viewModel.isIncoming, status: viewModel.status, isSelected: isSelected)
-                self.images[key] = image
-                return image
-            }
-        }
-
-        assert(false, "coulnd't find image for this status. ImageKey: \(key)")
-        return UIImage()
-    }
-
-    open func createImage(templateImage image: UIImage, isIncoming: Bool, status: MessageViewModelStatus, isSelected: Bool) -> UIImage {
-        var color = isIncoming ? self.baseStyle.baseColorIncoming : self.baseStyle.baseColorOutgoing
-
-        switch status {
-        case .success:
-            break
-        case .failed, .sending:
-            color = color.bma_blendWithColor(UIColor.white.withAlphaComponent(0.70))
-        }
-
-        if isSelected {
-            color = color.bma_blendWithColor(UIColor.black.withAlphaComponent(0.10))
-        }
-
-        return image.bma_tintWithColor(color)
-    }
-
-    private enum ImageKey: Hashable {
-        case template(isIncoming: Bool, showsTail: Bool)
-        case normal(isIncoming: Bool, status: MessageViewModelStatus, showsTail: Bool, isSelected: Bool)
-
-        var hashValue: Int {
-            switch self {
-            case let .template(isIncoming: isIncoming, showsTail: showsTail):
-                return Chatto.bma_combine(hashes: [1 /*template*/, isIncoming.hashValue, showsTail.hashValue])
-            case let .normal(isIncoming: isIncoming, status: status, showsTail: showsTail, isSelected: isSelected):
-                return Chatto.bma_combine(hashes: [2 /*normal*/, isIncoming.hashValue, status.hashValue, showsTail.hashValue, isSelected.hashValue])
-            }
-        }
-
-        static func == (lhs: TextMessageCollectionViewCellDefaultStyle.ImageKey, rhs: TextMessageCollectionViewCellDefaultStyle.ImageKey) -> Bool {
-            switch (lhs, rhs) {
-            case let (.template(lhsValues), .template(rhsValues)):
-                return lhsValues == rhsValues
-            case let (.normal(lhsValues), .normal(rhsValues)):
-                return lhsValues == rhsValues
-            default:
-                return false
-            }
-        }
-    }
+//    private enum ImageKey: Hashable {
+//        case template(isIncoming: Bool, showsTail: Bool)
+//        case normal(isIncoming: Bool, status: MessageViewModelStatus, showsTail: Bool, isSelected: Bool)
+//
+//        var hashValue: Int {
+//            switch self {
+//            case let .template(isIncoming: isIncoming, showsTail: showsTail):
+//                return Chatto.bma_combine(hashes: [1 /*template*/, isIncoming.hashValue, showsTail.hashValue])
+//            case let .normal(isIncoming: isIncoming, status: status, showsTail: showsTail, isSelected: isSelected):
+//                return Chatto.bma_combine(hashes: [2 /*normal*/, isIncoming.hashValue, status.hashValue, showsTail.hashValue, isSelected.hashValue])
+//            }
+//        }
+//
+//        static func == (lhs: TextMessageCollectionViewCellDefaultStyle.ImageKey, rhs: TextMessageCollectionViewCellDefaultStyle.ImageKey) -> Bool {
+//            switch (lhs, rhs) {
+//            case let (.template(lhsValues), .template(rhsValues)):
+//                return lhsValues == rhsValues
+//            case let (.normal(lhsValues), .normal(rhsValues)):
+//                return lhsValues == rhsValues
+//            default:
+//                return false
+//            }
+//        }
+//    }
 }
 
 public extension TextMessageCollectionViewCellDefaultStyle { // Default values
@@ -182,9 +187,7 @@ public extension TextMessageCollectionViewCellDefaultStyle { // Default values
         return TextStyle(
             font: UIFont.systemFont(ofSize: 16),
             incomingColor: UIColor.black,
-            outgoingColor: UIColor.white,
-            incomingInsets: UIEdgeInsets(top: 10, left: 19, bottom: 10, right: 15),
-            outgoingInsets: UIEdgeInsets(top: 10, left: 15, bottom: 10, right: 19)
+            outgoingColor: UIColor.white
         )
     }
 }

@@ -24,12 +24,11 @@
 
 import Foundation
 
-open class PhotoMessagePresenter<ViewModelBuilderT, InteractionHandlerT>
-: BaseMessagePresenter<PhotoBubbleView, ViewModelBuilderT, InteractionHandlerT> where
-    ViewModelBuilderT: ViewModelBuilderProtocol,
+open class PhotoMessagePresenter<ViewModelBuilderT: ViewModelBuilderProtocol, InteractionHandlerT: BaseMessageInteractionHandlerProtocol> :
+    BaseMessagePresenter<PhotoBubbleView<ViewModelBuilderT.ViewModelT>, ViewModelBuilderT, InteractionHandlerT> where
     ViewModelBuilderT.ViewModelT: PhotoMessageViewModelProtocol,
-    InteractionHandlerT: BaseMessageInteractionHandlerProtocol,
     InteractionHandlerT.ViewModelT == ViewModelBuilderT.ViewModelT {
+    
     public typealias ModelT = ViewModelBuilderT.ModelT
     public typealias ViewModelT = ViewModelBuilderT.ViewModelT
 
@@ -39,7 +38,7 @@ open class PhotoMessagePresenter<ViewModelBuilderT, InteractionHandlerT>
         messageModel: ModelT,
         viewModelBuilder: ViewModelBuilderT,
         interactionHandler: InteractionHandlerT?,
-        sizingCell: PhotoMessageCollectionViewCell,
+        sizingCell: PhotoMessageCollectionViewCell<ViewModelT>,
         baseCellStyle: BaseMessageCollectionViewCellStyleProtocol,
         photoCellStyle: PhotoMessageCollectionViewCellStyleProtocol) {
             self.photoCellStyle = photoCellStyle
@@ -53,7 +52,7 @@ open class PhotoMessagePresenter<ViewModelBuilderT, InteractionHandlerT>
     }
 
     public final override class func registerCells(_ collectionView: UICollectionView) {
-        collectionView.register(PhotoMessageCollectionViewCell.self, forCellWithReuseIdentifier: "photo-message")
+        collectionView.register(PhotoMessageCollectionViewCell<ViewModelT>.self, forCellWithReuseIdentifier: "photo-message")
     }
 
     public final override func dequeueCell(collectionView: UICollectionView, indexPath: IndexPath) -> UICollectionViewCell {
@@ -73,9 +72,9 @@ open class PhotoMessagePresenter<ViewModelBuilderT, InteractionHandlerT>
         return viewModel
     }
 
-    public var photoCell: PhotoMessageCollectionViewCell? {
+    public var photoCell: PhotoMessageCollectionViewCell<ViewModelT>? {
         if let cell = self.cell {
-            if let photoCell = cell as? PhotoMessageCollectionViewCell {
+            if let photoCell = cell as? PhotoMessageCollectionViewCell<ViewModelT> {
                 return photoCell
             } else {
                 assert(false, "Invalid cell was given to presenter!")
@@ -84,15 +83,15 @@ open class PhotoMessagePresenter<ViewModelBuilderT, InteractionHandlerT>
         return nil
     }
 
-    open override func configureCell(_ cell: BaseMessageCollectionViewCell<PhotoBubbleView>, decorationAttributes: ChatItemDecorationAttributes, animated: Bool, additionalConfiguration: (() -> Void)?) {
-        guard let cell = cell as? PhotoMessageCollectionViewCell else {
+    open override func configureCell(_ cell: BaseMessageCollectionViewCell<PhotoBubbleView<ViewModelT>>, decorationAttributes: ChatItemDecorationAttributes, animated: Bool, additionalConfiguration: (() -> Void)?) {
+        guard let photoCell = cell as? PhotoMessageCollectionViewCell<ViewModelT> else {
             assert(false, "Invalid cell received")
             return
         }
 
-        super.configureCell(cell, decorationAttributes: decorationAttributes, animated: animated) { () -> Void in
-            cell.photoMessageViewModel = self.messageViewModel
-            cell.photoMessageStyle = self.photoCellStyle
+        super.configureCell(photoCell, decorationAttributes: decorationAttributes, animated: animated) { () -> Void in
+            photoCell.photoMessageViewModel = self.messageViewModel
+            photoCell.photoMessageStyle = self.photoCellStyle
             additionalConfiguration?()
         }
     }

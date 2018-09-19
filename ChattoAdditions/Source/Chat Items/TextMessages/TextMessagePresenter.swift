@@ -24,20 +24,22 @@
 
 import UIKit
 
-open class TextMessagePresenter<ViewModelBuilderT, InteractionHandlerT>
-: BaseMessagePresenter<TextBubbleView, ViewModelBuilderT, InteractionHandlerT> where
-    ViewModelBuilderT: ViewModelBuilderProtocol,
+open class TextMessagePresenter<ViewModelBuilderT: ViewModelBuilderProtocol, InteractionHandlerT: BaseMessageInteractionHandlerProtocol>
+: BaseMessagePresenter<TextBubbleView<ViewModelBuilderT.ViewModelT>, ViewModelBuilderT, InteractionHandlerT> where
     ViewModelBuilderT.ViewModelT: TextMessageViewModelProtocol,
-    InteractionHandlerT: BaseMessageInteractionHandlerProtocol,
     InteractionHandlerT.ViewModelT == ViewModelBuilderT.ViewModelT {
+    
     public typealias ModelT = ViewModelBuilderT.ModelT
     public typealias ViewModelT = ViewModelBuilderT.ViewModelT
+
+    public let layoutCache: NSCache<AnyObject, AnyObject>
+    public let textCellStyle: TextMessageCollectionViewCellStyleProtocol
 
     public init (
         messageModel: ModelT,
         viewModelBuilder: ViewModelBuilderT,
         interactionHandler: InteractionHandlerT?,
-        sizingCell: TextMessageCollectionViewCell,
+        sizingCell: TextMessageCollectionViewCell<ViewModelT>,
         baseCellStyle: BaseMessageCollectionViewCellStyleProtocol,
         textCellStyle: TextMessageCollectionViewCellStyleProtocol,
         layoutCache: NSCache<AnyObject, AnyObject>) {
@@ -52,12 +54,10 @@ open class TextMessagePresenter<ViewModelBuilderT, InteractionHandlerT>
             )
     }
 
-    let layoutCache: NSCache<AnyObject, AnyObject>
-    let textCellStyle: TextMessageCollectionViewCellStyleProtocol
 
     public final override class func registerCells(_ collectionView: UICollectionView) {
-        collectionView.register(TextMessageCollectionViewCell.self, forCellWithReuseIdentifier: "text-message-incoming")
-        collectionView.register(TextMessageCollectionViewCell.self, forCellWithReuseIdentifier: "text-message-outcoming")
+        collectionView.register(TextMessageCollectionViewCell<ViewModelT>.self, forCellWithReuseIdentifier: "text-message-incoming")
+        collectionView.register(TextMessageCollectionViewCell<ViewModelT>.self, forCellWithReuseIdentifier: "text-message-outcoming")
     }
 
     public final override func dequeueCell(collectionView: UICollectionView, indexPath: IndexPath) -> UICollectionViewCell {
@@ -74,9 +74,9 @@ open class TextMessagePresenter<ViewModelBuilderT, InteractionHandlerT>
         return viewModel
     }
 
-    public var textCell: TextMessageCollectionViewCell? {
+    public var textCell: TextMessageCollectionViewCell<ViewModelT>? {
         if let cell = self.cell {
-            if let textCell = cell as? TextMessageCollectionViewCell {
+            if let textCell = cell as? TextMessageCollectionViewCell<ViewModelT> {
                 return textCell
             } else {
                 assert(false, "Invalid cell was given to presenter!")
@@ -85,16 +85,16 @@ open class TextMessagePresenter<ViewModelBuilderT, InteractionHandlerT>
         return nil
     }
 
-    open override func configureCell(_ cell: BaseMessageCollectionViewCell<TextBubbleView>, decorationAttributes: ChatItemDecorationAttributes, animated: Bool, additionalConfiguration: (() -> Void)?) {
-        guard let cell = cell as? TextMessageCollectionViewCell else {
+    open override func configureCell(_ cell: BaseMessageCollectionViewCell<TextBubbleView<ViewModelT>>, decorationAttributes: ChatItemDecorationAttributes, animated: Bool, additionalConfiguration: (() -> Void)?) {
+        guard let textCell = cell as? TextMessageCollectionViewCell<ViewModelT> else {
             assert(false, "Invalid cell received")
             return
         }
 
-        super.configureCell(cell, decorationAttributes: decorationAttributes, animated: animated) { () -> Void in
-            cell.layoutCache = self.layoutCache
-            cell.textMessageViewModel = self.messageViewModel
-            cell.textMessageStyle = self.textCellStyle
+        super.configureCell(textCell, decorationAttributes: decorationAttributes, animated: animated) { () -> Void in
+            textCell.layoutCache = self.layoutCache
+            textCell.textMessageViewModel = self.messageViewModel
+            textCell.textMessageStyle = self.textCellStyle
             additionalConfiguration?()
         }
     }
@@ -105,6 +105,8 @@ open class TextMessagePresenter<ViewModelBuilderT, InteractionHandlerT>
         }
     }
 
+    // MARK: - MenuController
+    
     open override func canShowMenu() -> Bool {
         return true
     }

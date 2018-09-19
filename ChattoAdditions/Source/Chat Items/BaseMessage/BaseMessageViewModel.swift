@@ -51,6 +51,7 @@ public protocol MessageViewModelProtocol: class { // why class? https://gist.git
     var date: String { get }
     var status: MessageViewModelStatus { get }
     var avatarImage: Observable<UIImage?> { get set }
+    var senderName: String? { get set }
     func willBeShown() // Optional
     func wasHidden() // Optional
 }
@@ -108,9 +109,22 @@ extension DecoratedMessageViewModelProtocol {
             self.messageViewModel.avatarImage = newValue
         }
     }
+    
+    public var senderName: String? {
+        get {
+            return self.messageViewModel.senderName
+        }
+        set {
+            self.messageViewModel.senderName = newValue
+        }
+    }
+    
 }
 
 open class MessageViewModel: MessageViewModelProtocol {
+    
+    open var senderName: String?
+    
     open var isIncoming: Bool {
         return self.messageModel.isIncoming
     }
@@ -132,7 +146,9 @@ open class MessageViewModel: MessageViewModelProtocol {
     public init(dateFormatter: DateFormatter,
                 messageModel: MessageModelProtocol,
                 avatarImage: UIImage?,
+                senderName: String?,
                 decorationAttributes: BaseMessageDecorationAttributes) {
+        self.senderName = senderName
         self.dateFormatter = dateFormatter
         self.messageModel = messageModel
         self.avatarImage = Observable<UIImage?>(avatarImage)
@@ -163,6 +179,7 @@ public class MessageViewModelDefaultBuilder {
         return MessageViewModel(dateFormatter: MessageViewModelDefaultBuilder.dateFormatter,
                                 messageModel: message,
                                 avatarImage: nil,
+                                senderName: nil,
                                 decorationAttributes: BaseMessageDecorationAttributes())
     }
 }

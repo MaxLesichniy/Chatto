@@ -26,17 +26,27 @@ import UIKit
 
 public typealias PhotoMessageCollectionViewCellStyleProtocol = PhotoBubbleViewStyleProtocol
 
-public final class PhotoMessageCollectionViewCell: BaseMessageCollectionViewCell<PhotoBubbleView> {
+public final class PhotoMessageCollectionViewCell<MessageViewModelT: PhotoMessageViewModelProtocol>: BaseMessageCollectionViewCell<PhotoBubbleView<MessageViewModelT>> {
 
-    static func sizingCell() -> PhotoMessageCollectionViewCell {
-        let cell = PhotoMessageCollectionViewCell(frame: CGRect.zero)
+    static func sizingCell() -> PhotoMessageCollectionViewCell<MessageViewModelT> {
+        let cell = PhotoMessageCollectionViewCell<MessageViewModelT>(frame: CGRect.zero)
         cell.viewContext = .sizing
         return cell
     }
+    
+    // MARK: Subclassing (view creation)
 
-    public override func createBubbleView() -> PhotoBubbleView {
-        return PhotoBubbleView()
+    public override func createBubbleView() -> PhotoBubbleView<MessageViewModelT> {
+        return PhotoBubbleView<MessageViewModelT>(frame: .zero)
     }
+
+    public override func performBatchUpdates(_ updateClosure: @escaping () -> Void, animated: Bool, completion: (() -> Void)?) {
+        super.performBatchUpdates({ () -> Void in
+            self.bubbleView.performBatchUpdates(updateClosure, animated: false, completion: nil)
+        }, animated: animated, completion: completion)
+    }
+    
+    // MARK: Property forwarding
 
     override public var viewContext: ViewContext {
         didSet {
@@ -47,19 +57,15 @@ public final class PhotoMessageCollectionViewCell: BaseMessageCollectionViewCell
     public var photoMessageViewModel: PhotoMessageViewModelProtocol! {
         didSet {
             self.messageViewModel = self.photoMessageViewModel
-            self.bubbleView.photoMessageViewModel = self.photoMessageViewModel
+            self.bubbleView.messageViewModel = self.photoMessageViewModel as? MessageViewModelT
         }
     }
 
     public var photoMessageStyle: PhotoMessageCollectionViewCellStyleProtocol! {
         didSet {
-            self.bubbleView.photoMessageStyle = self.photoMessageStyle
+            self.bubbleView.bubbleViewStyle = self.photoMessageStyle as! PhotoBubbleViewDefaultStyle
         }
     }
 
-    public override func performBatchUpdates(_ updateClosure: @escaping () -> Void, animated: Bool, completion: (() -> Void)?) {
-        super.performBatchUpdates({ () -> Void in
-            self.bubbleView.performBatchUpdates(updateClosure, animated: false, completion: nil)
-        }, animated: animated, completion: completion)
-    }
+    
 }

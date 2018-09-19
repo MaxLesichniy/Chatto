@@ -26,18 +26,18 @@ import UIKit
 
 public typealias TextMessageCollectionViewCellStyleProtocol = TextBubbleViewStyleProtocol
 
-public final class TextMessageCollectionViewCell: BaseMessageCollectionViewCell<TextBubbleView> {
+public final class TextMessageCollectionViewCell<MessageViewModelT: TextMessageViewModelProtocol>: BaseMessageCollectionViewCell<TextBubbleView<MessageViewModelT>> {
 
-    public static func sizingCell() -> TextMessageCollectionViewCell {
-        let cell = TextMessageCollectionViewCell(frame: CGRect.zero)
+    public static func sizingCell() -> TextMessageCollectionViewCell<MessageViewModelT> {
+        let cell = TextMessageCollectionViewCell<MessageViewModelT>(frame: CGRect.zero)
         cell.viewContext = .sizing
         return cell
     }
 
     // MARK: Subclassing (view creation)
 
-    public override func createBubbleView() -> TextBubbleView {
-        return TextBubbleView()
+    public override func createBubbleView() -> TextBubbleView<MessageViewModelT> {
+        return TextBubbleView<MessageViewModelT>(frame: .zero)
     }
 
     public override func performBatchUpdates(_ updateClosure: @escaping () -> Void, animated: Bool, completion: (() -> Void)?) {
@@ -54,16 +54,16 @@ public final class TextMessageCollectionViewCell: BaseMessageCollectionViewCell<
         }
     }
 
-    public var textMessageViewModel: TextMessageViewModelProtocol! {
+    public var textMessageViewModel: MessageViewModelT! {
         didSet {
             self.messageViewModel = self.textMessageViewModel
-            self.bubbleView.textMessageViewModel = self.textMessageViewModel
+            self.bubbleView.messageViewModel = self.textMessageViewModel
         }
     }
 
     public var textMessageStyle: TextMessageCollectionViewCellStyleProtocol! {
         didSet {
-            self.bubbleView.style = self.textMessageStyle
+            self.bubbleView.bubbleViewStyle = self.textMessageStyle as! TextBubbleViewDefaultStyle
         }
     }
 
