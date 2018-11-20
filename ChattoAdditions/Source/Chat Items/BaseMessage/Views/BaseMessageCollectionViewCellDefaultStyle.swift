@@ -91,11 +91,12 @@ open class BaseMessageCollectionViewCellDefaultStyle: BaseMessageCollectionViewC
     public struct SenderNameStyle {
         let font: UIFont
         let textColor: UIColor
-        let isHidden: Bool = false
+        let isHidden: Bool
         
-        public init(font: UIFont = .systemFont(ofSize: 13), textColor: UIColor) {
+        public init(font: UIFont = .systemFont(ofSize: 13), textColor: UIColor, isHidden: Bool = false ) {
             self.font = font
             self.textColor = textColor
+            self.isHidden = isHidden
         }
     }
 
